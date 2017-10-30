@@ -42,8 +42,8 @@ This task is performed by the `build_*` scripts to be run in the corresponding O
 ## Credits
 
   - Icon by [Everaldo Coelho](https://www.iconfinder.com/icons/4219/card_game_poker_icon) (freeware)
-  - Playing cards by [Kenney](http://kenney.nl/assets/boardgame-pack) (public domain)
-  - Background by [Caveman](https://www.toptal.com/designers/subtlepatterns/pool-table/) ()
+  - Playing cards by [Kenney](http://kenney.nl/assets/boardgame-pack) (CC0 1.0 Universal)
+  - Background by [Subtle Patterns](https://www.toptal.com/designers/subtlepatterns/pool-table/) (CC BY-SA 3.0)
 
 ## End words
 
