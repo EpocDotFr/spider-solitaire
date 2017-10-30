@@ -6,8 +6,8 @@ import sys
 import os
 
 
-CARD_WIDTH = 100
-CARDS_VARIANTS = ['spade', 'heart', 'diamond', 'club']
+CARDS_WIDTH = 70
+CARDS_VARIANTS = ['spades', 'hearts', 'diamonds', 'clubs']
 
 
 @click.command()
@@ -36,7 +36,7 @@ def run(inputdir, outputdir):
 
     logging.info('Checking output sub-dirs')
 
-    for card_variant in ['spade', 'heart', 'diamond', 'club']:
+    for card_variant in CARDS_VARIANTS:
         card_variant_dir = os.path.join(outputdir, card_variant)
 
         if not os.path.isdir(card_variant_dir):
@@ -65,7 +65,7 @@ def run(inputdir, outputdir):
 
         card_type, card_variant = card_name.split('_of_')
 
-        card_variant = card_variant.rstrip('s2')
+        card_variant = card_variant.rstrip('2')
 
         if card_variant not in CARDS_VARIANTS:
             logging.info(card_name + ': invalid variant "' + card_variant + '"')
@@ -73,7 +73,7 @@ def run(inputdir, outputdir):
             continue
 
         card_image = Image.open(card_path)
-        card_image.thumbnail((CARD_WIDTH, CARD_WIDTH), Image.ANTIALIAS)
+        card_image.thumbnail((CARDS_WIDTH, 9999), Image.ANTIALIAS)
         card_image.save(os.path.join(outputdir, card_variant, card_type + '.png'), optimize=True)
 
 if __name__ == '__main__':

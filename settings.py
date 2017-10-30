@@ -5,7 +5,8 @@ import os
 # Editable settings
 
 FPS = 30
-
+CARDS_WIDTH = 70
+CARDS_HEIGHT = 101
 TABLEAU_COLS = 10
 
 # ----------------------------------------------------------------------
@@ -30,7 +31,7 @@ CARDS = {
     '2': 1
 }
 
-CARDS_VARIANTS = ['spade', 'heart', 'diamond', 'club']
+CARDS_VARIANTS = ['spades', 'hearts', 'diamonds', 'clubs']
 
 WINDOW_SIZE = (
     800,
