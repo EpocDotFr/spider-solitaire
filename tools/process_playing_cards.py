@@ -1,19 +1,31 @@
+# This script takes all the cards images from the Kenney's boardgame pack (http://kenney.nl/assets/boardgame-pack), resize
+# them and saves them in the appropriate output directory
+
 from PIL import Image
 from glob import glob
 import logging
 import click
 import sys
 import os
+import re
 
 
 CARDS_WIDTH = 70
 CARDS_VARIANTS = ['spades', 'hearts', 'diamonds', 'clubs']
 
+first_cap_re = re.compile('(.)([A-Z][a-z]+)')
+all_cap_re = re.compile('([a-z0-9])([A-Z0-9])')
+
+
+def snake_case(string):
+    s1 = first_cap_re.sub(r'\1_\2', string)
+
+    return all_cap_re.sub(r'\1_\2', s1).lower()
+
 
 @click.command()
 @click.option('--inputdir', '-i', help='Directory containing the cards PNG files')
-@click.option('--outputdir', '-o', help='Root output directory')
-def run(inputdir, outputdir):
+def run(inputdir):
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%d/%m/%Y %H:%M:%S',
@@ -24,15 +36,14 @@ def run(inputdir, outputdir):
 
     context = click.get_current_context()
 
-    if not inputdir or not outputdir:
+    if not inputdir:
         click.echo(run.get_help(context))
         context.exit()
 
     if not os.path.isdir(inputdir):
         raise FileNotFoundError(inputdir + ' does not exists')
 
-    if not os.path.isdir(outputdir):
-        raise FileNotFoundError(outputdir + ' does not exists')
+    outputdir = os.path.realpath('../resources/images/cards')
 
     logging.info('Checking output sub-dirs')
 
@@ -44,33 +55,37 @@ def run(inputdir, outputdir):
 
             os.mkdir(card_variant_dir)
 
-    logging.info('Preprocessing cards')
-
     card_paths = glob(os.path.join(inputdir, '*.png'))
-
-    for card_path in list(card_paths):
-        card_name = os.path.splitext(os.path.basename(card_path))[0]
-
-        if card_name.endswith('joker'):
-            card_paths.remove(card_path)
-        elif card_name.endswith('2'):
-            card_paths.remove(os.path.join(os.path.dirname(card_path), card_name.rstrip('2') + '.png'))
 
     logging.info('Processing cards')
 
     for card_path in card_paths:
         card_name = os.path.splitext(os.path.basename(card_path))[0]
 
+        if card_name.startswith('cardBack') or card_name == 'cardJoker':
+            logging.info('Ignoring ' + card_name)
+
+            continue
+
         logging.info('Processing ' + card_name)
 
-        card_type, card_variant = card_name.split('_of_')
+        card_name = snake_case(card_name.replace('card', ''))
 
-        card_variant = card_variant.rstrip('2')
+        card_variant, card_type = card_name.split('_')
 
         if card_variant not in CARDS_VARIANTS:
             logging.info(card_name + ': invalid variant "' + card_variant + '"')
 
             continue
+
+        if card_type == 'a':
+            card_type = 'ace'
+        elif card_type == 'j':
+            card_type = 'jack'
+        elif card_type == 'k':
+            card_type = 'king'
+        elif card_type == 'q':
+            card_type = 'queen'
 
         card_image = Image.open(card_path)
         card_image.thumbnail((CARDS_WIDTH, 9999), Image.ANTIALIAS)

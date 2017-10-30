@@ -42,7 +42,7 @@ This task is performed by the `build_*` scripts to be run in the corresponding O
 ## Credits
 
   - Icon by [Everaldo Coelho](https://www.iconfinder.com/icons/4219/card_game_poker_icon) (freeware)
-  - Playing cards by [Unknown](https://code.google.com/archive/p/vector-playing-cards/) (public domain)
+  - Playing cards, sound effects by [Kenney](http://kenney.nl/assets/boardgame-pack) (public domain)
 
 ## End words
 
