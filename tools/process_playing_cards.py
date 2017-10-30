@@ -1,5 +1,5 @@
-# This script takes all the cards images from the Kenney's boardgame pack (http://kenney.nl/assets/boardgame-pack), resize
-# them and saves them in the appropriate output directory
+# This script takes all the cards images from the Kenney's boardgame pack (http://kenney.nl/assets/boardgame-pack),
+# resize them and saves them in ../resources/images/cards directory
 
 from PIL import Image
 from glob import glob
