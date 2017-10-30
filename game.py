@@ -17,8 +17,27 @@ class Game:
         pygame.display.set_caption('Spider Solitaire')
         pygame.display.set_icon(helpers.load_image('icon.png'))
 
+        self._load_images()
         self._init_cards()
         self._start_new_game()
+
+    def _load_images(self):
+        """Load all the images resources."""
+        logging.info('Loading images')
+
+        self.images = {}
+        self.images['background'] = helpers.load_image('background.png')
+
+    def _init_cards(self):
+        """Initialize the cards instances (all the 52 cards * 2)."""
+        self.cards = []
+
+        for _ in range(0, 2):
+            for card_variant in settings.CARDS_VARIANTS:
+                for card_id in settings.CARDS.keys():
+                    self.cards.append(cards.Card(card_id, card_variant))
+
+        random.shuffle(self.cards)
 
     def _start_new_game(self):
         """Start a new game."""
@@ -28,18 +47,8 @@ class Game:
 
         self.deal(54)
 
-    def _init_cards(self):
-        self.cards = []
-
-        for card_variant in settings.CARDS_VARIANTS:
-            for card_id in settings.CARDS.keys():
-                self.cards.append(cards.Card(card_id, card_variant))
-
-        random.shuffle(self.cards)
-
-        return self.cards
-
     def deal(self, count):
+        """Deal cards in the tableau."""
         cards_per_columns = math.floor(count / settings.TABLEAU_COLS)
 
         cards_to_deal = [self.cards.pop(0) for _ in range(0, count)]
@@ -56,8 +65,8 @@ class Game:
             self._event_quit(event)
 
         # Drawings
-
-        # TODO
+        self._draw_background()
+        self._draw_top_tableau()
 
         # PyGame-related updates
         pygame.display.update()
@@ -76,4 +85,26 @@ class Game:
     # --------------------------------------------------------------------------
     # Drawing handlers
 
-    # TODO
+    def _draw_background(self):
+        """Draw the game background."""
+        bg_width, bg_height = self.images['background'].get_size()
+
+        y_count = math.ceil(self.window.get_height() / bg_height)
+        x_count = math.ceil(self.window.get_width() / bg_width)
+
+        for y in range(0, y_count):
+            for x in range(0, x_count):
+                bg_rect = self.images['background'].get_rect()
+                bg_rect.left += x * bg_width
+                bg_rect.top += y * bg_height
+
+                self.window.blit(self.images['background'], bg_rect)
+
+    def _draw_top_tableau(self):
+        for column, col_cards in enumerate(self.tableau):
+            # TODO TEMPORARY
+
+            col_cards[0].rect.top = 10
+            col_cards[0].rect.left = column * col_cards[0].rect.w + column * 10
+
+            self.window.blit(col_cards[0].image, col_cards[0].rect)
