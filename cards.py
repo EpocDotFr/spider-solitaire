@@ -13,7 +13,7 @@ class Card:
         if id not in settings.CARDS:
             raise ValueError('Invalid card id provided')
 
-        if variant not in settings.VARIANTS:
+        if variant not in settings.CARDS_VARIANTS:
             raise ValueError('Invalid card variant provided')
 
         self.id = id

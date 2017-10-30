@@ -31,7 +31,7 @@ class Game:
     def _init_cards(self):
         self.cards = []
 
-        for card_variant in settings.VARIANTS:
+        for card_variant in settings.CARDS_VARIANTS:
             for card_id in settings.CARDS.keys():
                 self.cards.append(cards.Card(card_id, card_variant))
 

@@ -30,9 +30,7 @@ CARDS = {
     '2': 1
 }
 
-VARIANTS = [
-    'spade', 'heart', 'diamond', 'club'
-]
+CARDS_VARIANTS = ['spade', 'heart', 'diamond', 'club']
 
 WINDOW_SIZE = (
     800,
