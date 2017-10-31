@@ -30,31 +30,26 @@ class Game:
 
     def _init_cards(self):
         """Initialize the cards instances (all the 52 cards * 2)."""
-        self.cards = []
+        self.deck = cards.get_cards(2)
 
-        for _ in range(0, 2):
-            for card_variant in settings.CARDS_VARIANTS:
-                for card_id in settings.CARDS.keys():
-                    self.cards.append(cards.Card(card_id, card_variant))
-
-        random.shuffle(self.cards)
+        random.shuffle(self.deck)
 
     def _start_new_game(self):
         """Start a new game."""
         logging.info('Initializing new game')
 
-        self.tableau = [[] for _ in range(0, settings.TABLEAU_COLS)]
+        self.tableau = [[] for _ in range(0, settings.PILES)]
 
-        self.deal(54)
+        self._deal(54)
 
-    def deal(self, count):
-        """Deal cards in the tableau."""
-        cards_per_columns = math.floor(count / settings.TABLEAU_COLS)
+    def _deal(self, count):
+        """Deal count cards to the tableau."""
+        cards_per_piles = math.floor(count / settings.PILES)
 
-        cards_to_deal = [self.cards.pop(0) for _ in range(0, count)]
+        cards_to_deal = [self.deck.pop(0) for _ in range(0, count)]
 
         for i in range(0, len(self.tableau)):
-            self.tableau[i].extend(cards_to_deal[i:i + cards_per_columns])
+            self.tableau[i].extend(cards_to_deal[i:i + cards_per_piles])
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -66,7 +61,8 @@ class Game:
 
         # Drawings
         self._draw_background()
-        self._draw_top_tableau()
+        self._draw_deck()
+        self._draw_tableau()
 
         # PyGame-related updates
         pygame.display.update()
@@ -100,11 +96,12 @@ class Game:
 
                 self.window.blit(self.images['background'], bg_rect)
 
-    def _draw_top_tableau(self):
-        for column, col_cards in enumerate(self.tableau):
-            # TODO TEMPORARY
+    def _draw_deck(self):
+        pass # TODO
 
-            col_cards[0].rect.top = 10
-            col_cards[0].rect.left = column * col_cards[0].rect.w + column * 10
+    def _draw_tableau(self):
+        for pile_num, pile_cards in enumerate(self.tableau):
+            pile_cards[0].rect.top = settings.WINDOW_PADDING + settings.CARDS_HEIGHT + settings.CARDS_VERTICAL_MARGIN
+            pile_cards[0].rect.left = pile_num * pile_cards[0].rect.w + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
 
-            self.window.blit(col_cards[0].image, col_cards[0].rect)
+            self.window.blit(pile_cards[0].image, pile_cards[0].rect)
