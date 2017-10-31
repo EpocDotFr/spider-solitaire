@@ -18,38 +18,42 @@ class Game:
         pygame.display.set_icon(helpers.load_image('icon.png'))
 
         self._load_images()
-        self._init_cards()
         self._start_new_game()
 
     def _load_images(self):
-        """Load all the images resources."""
+        """Load all images."""
         logging.info('Loading images')
 
         self.images = {}
         self.images['background'] = helpers.load_image('background.png')
 
-    def _init_cards(self):
-        """Initialize the cards instances (all the 52 cards * 2)."""
-        self.deck = cards.get_cards(2)
-
-        random.shuffle(self.deck)
-
     def _start_new_game(self):
         """Start a new game."""
         logging.info('Initializing new game')
 
+        self._init_deck()
+
         self.tableau = [[] for _ in range(0, settings.PILES)]
 
-        self._deal(54)
+        self._deal(settings.CARDS_INITIAL_DEAL)
+
+    def _init_deck(self):
+        """Initialize the deck (cards instances): all the 52 cards * 2."""
+        logging.info('Initializing deck')
+
+        self.deck = cards.get_cards(2)
+
+        random.shuffle(self.deck)
 
     def _deal(self, count):
-        """Deal count cards to the tableau."""
+        """Deal a specified amount of cards in the piles of the tableau."""
+        logging.info('Dealing {} cards'.format(count))
+
         cards_per_piles = math.floor(count / settings.PILES)
 
-        cards_to_deal = [self.deck.pop(0) for _ in range(0, count)]
-
-        for i in range(0, len(self.tableau)):
-            self.tableau[i].extend(cards_to_deal[i:i + cards_per_piles])
+        for i in range(0, settings.PILES):
+            for _ in range(0, cards_per_piles):
+                self.tableau[i].append(self.deck.pop(0))
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -85,8 +89,8 @@ class Game:
         """Draw the game background."""
         bg_width, bg_height = self.images['background'].get_size()
 
-        y_count = math.ceil(self.window.get_height() / bg_height)
-        x_count = math.ceil(self.window.get_width() / bg_width)
+        y_count = math.ceil(self.window_rect.h / bg_height)
+        x_count = math.ceil(self.window_rect.w / bg_width)
 
         for y in range(0, y_count):
             for x in range(0, x_count):
@@ -97,11 +101,28 @@ class Game:
                 self.window.blit(self.images['background'], bg_rect)
 
     def _draw_deck(self):
-        pass # TODO
+        """Draw the deck. One face down card per 10 cards."""
+        cards_to_draw = len(list(range(0, len(self.deck), settings.CARDS_PER_DEAL))) - 1
+
+        for i in range(0, cards_to_draw):
+            face_down_card = cards.FaceDownCard()
+            face_down_card.rect.top = settings.WINDOW_PADDING
+            face_down_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + ((i * settings.CARDS_WIDTH) / 4))
+
+            self.window.blit(face_down_card.image, face_down_card.rect)
 
     def _draw_tableau(self):
+        """Draw the tableau."""
         for pile_num, pile_cards in enumerate(self.tableau):
-            pile_cards[0].rect.top = settings.WINDOW_PADDING + settings.CARDS_HEIGHT + settings.CARDS_VERTICAL_MARGIN
-            pile_cards[0].rect.left = pile_num * pile_cards[0].rect.w + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
+            pile_cards_count = len(pile_cards)
 
-            self.window.blit(pile_cards[0].image, pile_cards[0].rect)
+            for pile_card_num, pile_card in enumerate(pile_cards):
+                if pile_card_num == pile_cards_count - 1:
+                    pile_card.set_face_down(False)
+                else:
+                    pile_card.set_face_down(True)
+
+                pile_card.rect.top = settings.TABLEAU_TOP + ((pile_card_num * settings.CARDS_HEIGHT) / 3)
+                pile_card.rect.left = pile_num * settings.CARDS_WIDTH + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
+
+                self.window.blit(pile_card.image, pile_card.rect)

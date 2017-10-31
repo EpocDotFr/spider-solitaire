@@ -26,7 +26,7 @@ CARDS_VARIANTS = ['spades', 'hearts', 'diamonds', 'clubs']
 
 
 class Card(pygame.sprite.Sprite):
-    def __init__(self, id, variant, visible=False):
+    def __init__(self, id, variant):
         super(Card, self).__init__()
 
         if id not in CARDS:
@@ -39,20 +39,29 @@ class Card(pygame.sprite.Sprite):
         self.power = CARDS[id]
         self.variant = variant
 
-        self.set_visible(visible)
+    def set_face_down(self, face_down):
+        self.face_down = face_down
 
-    def set_visible(self, is_visible):
-        self.is_visible = is_visible
-
-        if self.is_visible:
-            self.image = helpers.load_image('cards/' + self.variant + '/' + self.id + '.png')
-        else:
+        if self.face_down:
             self.image = helpers.load_image('cards/back.png')
+        else:
+            self.image = helpers.load_image('cards/' + self.variant + '/' + self.id + '.png')
 
         self.rect = self.image.get_rect()
 
     def __repr__(self):
         return '{}:{}'.format(self.id, self.variant)
+
+
+class FaceDownCard(pygame.sprite.Sprite):
+    def __init__(self):
+        super(FaceDownCard, self).__init__()
+
+        self.image = helpers.load_image('cards/back.png')
+        self.rect = self.image.get_rect()
+
+    def __repr__(self):
+        return 'FaceDownCard'
 
 
 def get_cards(nb_times=1):
