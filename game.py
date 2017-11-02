@@ -31,19 +31,13 @@ class Game:
         """Start a new game."""
         logging.info('Initializing new game')
 
-        self._init_deck()
+        self.deck = cards.get_cards(2)
+
+        random.shuffle(self.deck)
 
         self.tableau = [[] for _ in range(0, settings.PILES)]
 
         self._deal(settings.CARDS_INITIAL_DEAL)
-
-    def _init_deck(self):
-        """Initialize the deck (cards instances): all the 52 cards * 2."""
-        logging.info('Initializing deck')
-
-        self.deck = cards.get_cards(2)
-
-        random.shuffle(self.deck)
 
     def _deal(self, count):
         """Deal a specified amount of cards in the piles of the tableau."""
@@ -52,8 +46,26 @@ class Game:
         cards_per_piles = math.floor(count / settings.PILES)
 
         for i in range(0, settings.PILES):
-            for _ in range(0, cards_per_piles):
-                self.tableau[i].append(self.deck.pop(0))
+            for j in range(0, cards_per_piles):
+                card = self.deck.pop(0)
+
+                if j == cards_per_piles - 1:
+                    card.set_face_down(False)
+                else:
+                    card.set_face_down(True)
+
+                self.tableau[i].append(card)
+
+        self._update_deck_cards()
+
+    def _update_deck_cards(self):
+        """Update the cards objects of the deck."""
+        self.deck_cards = []
+
+        cards_to_draw = len(list(range(0, len(self.deck), settings.CARDS_PER_DEAL))) - 1
+
+        for i in range(0, cards_to_draw):
+            self.deck_cards.append(cards.FaceDownCard())
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -62,6 +74,7 @@ class Game:
         # Events handling
         for event in pygame.event.get():
             self._event_quit(event)
+            self._event_click(event)
 
         # Drawings
         self._draw_background()
@@ -81,6 +94,17 @@ class Game:
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
+
+    def _event_click(self, event):
+        """Handles all clicks."""
+        if event.type != pygame.MOUSEBUTTONDOWN:
+            return
+
+        for deck_card in self.deck_cards:
+            if deck_card.rect.collidepoint(event.pos):
+                self._deal(settings.CARDS_PER_DEAL)
+
+                return
 
     # --------------------------------------------------------------------------
     # Drawing handlers
@@ -102,32 +126,23 @@ class Game:
 
     def _draw_deck(self):
         """Draw the deck. One face down card per 10 cards."""
-        cards_to_draw = len(list(range(0, len(self.deck), settings.CARDS_PER_DEAL))) - 1
+        for i, deck_card in enumerate(self.deck_cards):
+            deck_card.rect.top = settings.WINDOW_PADDING
+            deck_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
 
-        for i in range(0, cards_to_draw):
-            face_down_card = cards.FaceDownCard()
-            face_down_card.rect.top = settings.WINDOW_PADDING
-            face_down_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
-
-            self.window.blit(face_down_card.image, face_down_card.rect)
+            self.window.blit(deck_card.image, deck_card.rect)
 
     def _draw_tableau(self):
         """Draw the tableau."""
         for pile_num, pile_cards in enumerate(self.tableau):
-            pile_cards_count = len(pile_cards)
             pile_top = settings.TABLEAU_TOP
             pile_left = pile_num * settings.CARDS_WIDTH + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
 
             for pile_card_num, pile_card in enumerate(pile_cards):
-                if pile_card_num == pile_cards_count - 1:
-                    pile_card.set_face_down(False)
-                else:
-                    pile_card.set_face_down(True)
-
                 pile_card.rect.top = pile_top
                 pile_card.rect.left = pile_left
 
-                margin_factor = 10 if pile_card.is_face_down else 25
+                margin_factor = 10 if pile_card.is_face_down else 30
 
                 pile_top += (settings.CARDS_HEIGHT * margin_factor) / 100
 
