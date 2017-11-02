@@ -40,9 +40,9 @@ class Card(pygame.sprite.Sprite):
         self.variant = variant
 
     def set_face_down(self, face_down):
-        self.face_down = face_down
+        self.is_face_down = face_down
 
-        if self.face_down:
+        if self.is_face_down:
             self.image = helpers.load_image('cards/back.png')
         else:
             self.image = helpers.load_image('cards/' + self.variant + '/' + self.id + '.png')

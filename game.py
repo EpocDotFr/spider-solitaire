@@ -107,7 +107,7 @@ class Game:
         for i in range(0, cards_to_draw):
             face_down_card = cards.FaceDownCard()
             face_down_card.rect.top = settings.WINDOW_PADDING
-            face_down_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + ((i * settings.CARDS_WIDTH) / 4))
+            face_down_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
 
             self.window.blit(face_down_card.image, face_down_card.rect)
 
@@ -115,6 +115,8 @@ class Game:
         """Draw the tableau."""
         for pile_num, pile_cards in enumerate(self.tableau):
             pile_cards_count = len(pile_cards)
+            pile_top = settings.TABLEAU_TOP
+            pile_left = pile_num * settings.CARDS_WIDTH + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
 
             for pile_card_num, pile_card in enumerate(pile_cards):
                 if pile_card_num == pile_cards_count - 1:
@@ -122,7 +124,11 @@ class Game:
                 else:
                     pile_card.set_face_down(True)
 
-                pile_card.rect.top = settings.TABLEAU_TOP + ((pile_card_num * settings.CARDS_HEIGHT) / 3)
-                pile_card.rect.left = pile_num * settings.CARDS_WIDTH + pile_num * settings.CARDS_HORIZONTAL_MARGIN + settings.WINDOW_PADDING
+                pile_card.rect.top = pile_top
+                pile_card.rect.left = pile_left
+
+                margin_factor = 10 if pile_card.is_face_down else 25
+
+                pile_top += (settings.CARDS_HEIGHT * margin_factor) / 100
 
                 self.window.blit(pile_card.image, pile_card.rect)
