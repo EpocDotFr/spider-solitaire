@@ -31,9 +31,11 @@ class Game:
         """Start a new game."""
         logging.info('Initializing new game')
 
-        self.deck = cards.get_cards(2)
+        self.available_cards = cards.get_cards(2)
 
-        random.shuffle(self.deck)
+        random.shuffle(self.available_cards)
+
+        self.processed_cards = []
 
         self.tableau = [[] for _ in range(0, settings.PILES)]
 
@@ -47,7 +49,7 @@ class Game:
 
         for i in range(0, settings.PILES):
             for j in range(0, cards_per_piles):
-                card = self.deck.pop(0)
+                card = self.available_cards.pop(0)
 
                 if j == cards_per_piles - 1:
                     card.set_face_down(False)
@@ -56,16 +58,25 @@ class Game:
 
                 self.tableau[i].append(card)
 
-        self._update_deck_cards()
+        self._update_available_cards()
+        self._compute_move_possibilities()
 
-    def _update_deck_cards(self):
-        """Update the cards objects of the deck."""
-        self.deck_cards = []
+    def _update_available_cards(self):
+        """Update the cards objects of the available cards."""
+        self.available_cards_images = []
 
-        cards_to_draw = len(list(range(0, len(self.deck), settings.CARDS_PER_DEAL))) - 1
+        cards_to_draw = len(list(range(0, len(self.available_cards), settings.CARDS_PER_DEAL))) - 1
 
         for i in range(0, cards_to_draw):
-            self.deck_cards.append(cards.FaceDownCard())
+            self.available_cards_images.append(cards.FaceDownCard())
+
+    def _update_processed_cards(self):
+        """Update the cards objects of the processed cards."""
+        pass # TODO
+
+    def _compute_move_possibilities(self):
+        """Compute every move possibilities for all the cards in the tableau."""
+        pass
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -78,7 +89,7 @@ class Game:
 
         # Drawings
         self._draw_background()
-        self._draw_deck()
+        self._draw_available_cards()
         self._draw_tableau()
 
         # PyGame-related updates
@@ -100,8 +111,9 @@ class Game:
         if event.type != pygame.MOUSEBUTTONDOWN:
             return
 
-        for deck_card in self.deck_cards:
-            if deck_card.rect.collidepoint(event.pos):
+        # Click on any of the available cards
+        for card in self.available_cards_images:
+            if card.rect.collidepoint(event.pos):
                 self._deal(settings.CARDS_PER_DEAL)
 
                 return
@@ -124,13 +136,13 @@ class Game:
 
                 self.window.blit(self.images['background'], bg_rect)
 
-    def _draw_deck(self):
+    def _draw_available_cards(self):
         """Draw the deck. One face down card per 10 cards."""
-        for i, deck_card in enumerate(self.deck_cards):
-            deck_card.rect.top = settings.WINDOW_PADDING
-            deck_card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
+        for i, card in enumerate(self.available_cards_images):
+            card.rect.top = settings.WINDOW_PADDING
+            card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
 
-            self.window.blit(deck_card.image, deck_card.rect)
+            self.window.blit(card.image, card.rect)
 
     def _draw_tableau(self):
         """Draw the tableau."""
