@@ -7,19 +7,19 @@ __all__ = [
 ]
 
 CARDS = {
-    'king': 13,
-    'queen': 12,
-    'jack': 11,
-    '10': 10,
-    '9': 9,
-    '8': 8,
+    'king': 1,
+    'queen': 2,
+    'jack': 3,
+    '10': 4,
+    '9': 5,
+    '8': 6,
     '7': 7,
-    '6': 6,
-    '5': 5,
-    '4': 4,
-    '3': 3,
-    '2': 2,
-    'ace': 1,
+    '6': 8,
+    '5': 9,
+    '4': 10,
+    '3': 11,
+    '2': 12,
+    'ace': 13
 }
 
 CARDS_VARIANTS = ['spades', 'hearts', 'diamonds', 'clubs']
@@ -48,6 +48,12 @@ class Card(pygame.sprite.Sprite):
             self.image = helpers.load_image('cards/' + self.variant + '/' + self.id + '.png')
 
         self.rect = self.image.get_rect()
+
+    def is_direct_next(self, other):
+        return self.power + 1 == other.power
+
+    def is_direct_previous(self, other):
+        return self.power - 1 == other.power
 
     def __repr__(self):
         return '{}:{}'.format(self.id, self.variant)

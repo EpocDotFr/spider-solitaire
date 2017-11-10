@@ -27,22 +27,44 @@ class Game:
         self.images = {}
         self.images['background'] = helpers.load_image('background.png')
 
+        # TODO Load the others images here one time and assign them to the cards later
+
     def _start_new_game(self):
         """Start a new game."""
         logging.info('Initializing new game')
 
         self.available_cards = cards.get_cards(2)
+        self.complete_stacks = []
 
         random.shuffle(self.available_cards)
-
-        self.processed_cards = []
 
         self.tableau = [[] for _ in range(0, settings.PILES)]
 
         self._deal(settings.CARDS_INITIAL_DEAL)
 
+    def _can_deal(self):
+        """Check if there's at least one card per pile except if there's not enough cards in the tableau."""
+        total_per_piles = [len(pile) for pile in self.tableau]
+        tableau_total = sum(total_per_piles)
+
+        # There isn't enough cards for each piles
+        if tableau_total < settings.PILES:
+            return True
+
+        # Check each piles for one that is empty
+        for pile_total in total_per_piles:
+            if pile_total == 0:
+                return False
+
+        return True
+
     def _deal(self, count):
-        """Deal a specified amount of cards in the piles of the tableau."""
+        """Deal a specified amount of cards, distributed in each piles of the tableau."""
+        if not self._can_deal():
+            logging.info('Cannot deal: empty piles exists or not enough cards')
+
+            return False
+
         logging.info('Dealing {} cards'.format(count))
 
         cards_per_piles = math.floor(count / settings.PILES)
@@ -59,7 +81,8 @@ class Game:
                 self.tableau[i].append(card)
 
         self._update_available_cards()
-        self._compute_move_possibilities()
+
+        return True
 
     def _update_available_cards(self):
         """Update the cards objects of the available cards."""
@@ -70,13 +93,25 @@ class Game:
         for i in range(0, cards_to_draw):
             self.available_cards_images.append(cards.FaceDownCard())
 
-    def _update_processed_cards(self):
-        """Update the cards objects of the processed cards."""
-        pass # TODO
+    def _handle_complete_stacks(self):
+        """Check each piles for complete stacks."""
+        for pile in self.tableau:
+            completed_deck_cards = []
 
-    def _compute_move_possibilities(self):
-        """Compute every move possibilities for all the cards in the tableau."""
-        pass
+            for i, card in enumerate(pile):
+                if i == len(pile) - 1:
+                    break
+
+                next_card = pile[i + 1]
+
+                if card.is_direct_previous(next_card):
+                    completed_deck_cards.append(card)
+
+            # If there's one complete pile, pull all of its cards in the complete stacks deck
+            if len(completed_deck_cards) == len(cards.CARDS):
+                pass
+                # self.complete_stacks.append(card)
+                # pile.remove(card)
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -115,6 +150,7 @@ class Game:
         for card in self.available_cards_images:
             if card.rect.collidepoint(event.pos):
                 self._deal(settings.CARDS_PER_DEAL)
+                self._handle_complete_stacks()
 
                 return
 
@@ -137,7 +173,7 @@ class Game:
                 self.window.blit(self.images['background'], bg_rect)
 
     def _draw_available_cards(self):
-        """Draw the deck. One face down card per 10 cards."""
+        """Draw the available cards deck. One face down card per 10 available cards."""
         for i, card in enumerate(self.available_cards_images):
             card.rect.top = settings.WINDOW_PADDING
             card.rect.right = self.window_rect.w - (settings.WINDOW_PADDING + (i * ((settings.CARDS_WIDTH * 25) / 100)))
