@@ -143,16 +143,14 @@ class Game:
 
     def _event_click(self, event):
         """Handles all clicks."""
-        if event.type != pygame.MOUSEBUTTONDOWN:
-            return
+        if event.type == pygame.MOUSEBUTTONUP:
+            # Click on any of the available cards
+            for card in self.available_cards_images:
+                if card.rect.collidepoint(event.pos):
+                    self._deal(settings.CARDS_PER_DEAL)
+                    self._handle_complete_stacks()
 
-        # Click on any of the available cards
-        for card in self.available_cards_images:
-            if card.rect.collidepoint(event.pos):
-                self._deal(settings.CARDS_PER_DEAL)
-                self._handle_complete_stacks()
-
-                return
+                    return
 
     # --------------------------------------------------------------------------
     # Drawing handlers
