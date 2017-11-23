@@ -96,22 +96,25 @@ class Game:
     def _handle_complete_stacks(self):
         """Check each piles for complete stacks."""
         for pile in self.tableau:
-            completed_deck_cards = []
+            complete_stack_cards = []
 
-            for i, card in enumerate(pile):
-                if i == len(pile) - 1:
+            for i, card in enumerate(pile): # For each cards in each piles
+                if card.is_face_down: # The card isn't visible: ignore
+                    continue
+
+                if i == len(pile) - 1: # The card is the last one of the pile: end handling this pile
                     break
 
-                next_card = pile[i + 1]
+                upper_card = pile[i + 1]
 
-                if card.is_direct_previous(next_card):
-                    completed_deck_cards.append(card)
+                if card.is_direct_previous(upper_card):
+                    complete_stack_cards.append(card)
 
-            # If there's one complete pile, pull all of its cards in the complete stacks deck
-            if len(completed_deck_cards) == len(cards.CARDS):
-                pass
-                # self.complete_stacks.append(card)
-                # pile.remove(card)
+            # If there's one complete stack, pull all of these cards into the complete stacks deck
+            if len(complete_stack_cards) == len(cards.CARDS):
+                for c in complete_stack_cards:
+                    self.complete_stacks.append(c)
+                    pile.remove(c)
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -144,13 +147,21 @@ class Game:
     def _event_click(self, event):
         """Handles all clicks."""
         if event.type == pygame.MOUSEBUTTONUP:
-            # Click on any of the available cards
+            # Click on any of the available cards deck
             for card in self.available_cards_images:
                 if card.rect.collidepoint(event.pos):
                     self._deal(settings.CARDS_PER_DEAL)
                     self._handle_complete_stacks()
 
                     return
+
+            # Click on any of the tableau cards
+            for pile in self.tableau:
+                for card in pile:
+                    if card.rect.collidepoint(event.pos):
+                        # TODO
+
+                        return
 
     # --------------------------------------------------------------------------
     # Drawing handlers
