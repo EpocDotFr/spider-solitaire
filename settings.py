@@ -17,6 +17,9 @@ CARDS_PER_DEAL = 10
 
 WINDOW_PADDING = 10
 
+MUSIC_VOLUME = 0.2
+SOUNDS_VOLUME = 0.3
+
 # ----------------------------------------------------------------------
 # Game constants - do not edit anything after this line
 

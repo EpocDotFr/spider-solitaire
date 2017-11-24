@@ -19,6 +19,10 @@ class Game:
 
         self._load_images()
 
+        logging.info('Loading random music')
+
+        helpers.load_random_music(['cryptic_puzzler2.wav', 'piano_puzzles.wav'], volume=settings.MUSIC_VOLUME)
+
         self._start_new_game()
 
     def _load_images(self):
