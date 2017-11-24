@@ -18,6 +18,7 @@ class Game:
         pygame.display.set_icon(helpers.load_image('icon.png'))
 
         self._load_images()
+
         self._start_new_game()
 
     def _load_images(self):
@@ -61,7 +62,7 @@ class Game:
     def _deal(self, count):
         """Deal a specified amount of cards, distributed in each piles of the tableau."""
         if not self._can_deal():
-            logging.info('Cannot deal: empty piles exists or not enough cards')
+            logging.info('Cannot deal: empty piles exists')
 
             return False
 
