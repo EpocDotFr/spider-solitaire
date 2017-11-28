@@ -19,10 +19,6 @@ class Game:
 
         self._load_images()
 
-        logging.info('Loading random music')
-
-        helpers.load_random_music(['cryptic_puzzler2.wav', 'piano_puzzles.wav'], volume=settings.MUSIC_VOLUME)
-
         self._start_new_game()
 
     def _load_images(self):
@@ -34,6 +30,12 @@ class Game:
 
         # TODO Load the others images here one time and assign them to the cards later
 
+    def _load_random_music(self):
+        """Load and play a random music."""
+        logging.info('Loading random music')
+
+        helpers.load_random_music(['cryptic_puzzler2.wav', 'piano_puzzles.wav'], volume=settings.MUSIC_VOLUME)
+
     def _start_new_game(self):
         """Start a new game."""
         logging.info('Initializing new game')
@@ -44,6 +46,10 @@ class Game:
         random.shuffle(self.available_cards)
 
         self.tableau = [[] for _ in range(0, settings.PILES)]
+
+        self.card_being_drag_and_drop = None
+
+        self._load_random_music()
 
         self._deal(settings.CARDS_INITIAL_DEAL)
 
@@ -127,8 +133,14 @@ class Game:
 
         # Events handling
         for event in pygame.event.get():
-            self._event_quit(event)
-            self._event_click(event)
+            event_handlers = [
+                self._event_quit,
+                self._event_click
+            ]
+
+            for handler in event_handlers:
+                if handler(event):
+                    break
 
         # Drawings
         self._draw_background()
@@ -149,24 +161,58 @@ class Game:
             pygame.quit()
             sys.exit()
 
+        return False
+
     def _event_click(self, event):
         """Handles all clicks."""
+        click_event_handlers = [
+            self._event_deal,
+            self._event_drag_tableau_card,
+            self._event_drop_tableau_card
+        ]
+
+        for handler in click_event_handlers:
+            if handler(event):
+                return True
+
+        return False
+
+    def _event_deal(self, event):
+        """Click on any of the available cards deck."""
         if event.type == pygame.MOUSEBUTTONUP:
-            # Click on any of the available cards deck
             for card in self.available_cards_images:
                 if card.rect.collidepoint(event.pos):
                     self._deal(settings.CARDS_PER_DEAL)
                     self._handle_complete_stacks()
 
-                    return
+                    return True
 
+        return False
+
+    def _get_clicked_tableau_card(self, event):
+        """Click on any of the tableau cards."""
+        if event.type == pygame.MOUSEBUTTONDOWN:
             # Click on any of the tableau cards
             for pile in self.tableau:
-                for card in pile:
+                for card in reversed(pile):
                     if card.rect.collidepoint(event.pos):
-                        # TODO
+                        return card
 
-                        return
+        return False
+
+    def _event_drag_tableau_card(self, event):
+        """Start to drag a tableau card."""
+        card = self._get_clicked_tableau_card(event)
+
+        if not card:
+            return False
+
+        self.card_being_drag_and_drop = card
+
+    def _event_drop_tableau_card(self, event):
+        """Drop a tableau card."""
+        if event.type == pygame.MOUSEBUTTONUP and self.card_being_drag_and_drop:
+            self.card_being_drag_and_drop = None # TODO
 
     # --------------------------------------------------------------------------
     # Drawing handlers
