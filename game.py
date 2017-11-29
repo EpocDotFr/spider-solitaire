@@ -47,7 +47,7 @@ class Game:
 
         self.tableau = [[] for _ in range(0, settings.PILES)]
 
-        self.card_being_drag_and_drop = None
+        self.selected_cards = []
 
         self._load_random_music()
 
@@ -85,9 +85,9 @@ class Game:
                 card = self.available_cards.pop(0)
 
                 if j == cards_per_piles - 1:
-                    card.set_face_down(False)
+                    card.is_face_down = False
                 else:
-                    card.set_face_down(True)
+                    card.is_face_down = True
 
                 self.tableau[i].append(card)
 
@@ -123,9 +123,9 @@ class Game:
 
             # If there's one complete stack, pull all of these cards into the complete stacks deck
             if len(complete_stack_cards) == len(cards.CARDS):
-                for c in complete_stack_cards:
-                    self.complete_stacks.append(c)
-                    pile.remove(c)
+                for card in complete_stack_cards:
+                    self.complete_stacks.append(card)
+                    pile.remove(card)
 
     def update(self):
         """Perform every updates of the game logic, events handling and drawing.
@@ -135,7 +135,9 @@ class Game:
         for event in pygame.event.get():
             event_handlers = [
                 self._event_quit,
-                self._event_click
+                self._event_deal,
+                self._event_select_tableau_cards,
+                self._event_place_tableau_cards
             ]
 
             for handler in event_handlers:
@@ -163,36 +165,54 @@ class Game:
 
         return False
 
-    def _event_click(self, event):
-        """Handles all clicks."""
-        click_event_handlers = [
-            self._event_deal,
-            self._event_drag_tableau_card,
-            self._event_drop_tableau_card
-        ]
+    def _event_deal(self, event):
+        """Deal cards if the player clicked on any of the vailable cards deck."""
+        if self._was_an_available_card_clicked(event):
+            self._deal(settings.CARDS_PER_DEAL)
+            self._handle_complete_stacks()
 
-        for handler in click_event_handlers:
-            if handler(event):
-                return True
+            return True
 
         return False
 
-    def _event_deal(self, event):
+    def _event_select_tableau_cards(self, event):
+        """Select one or more cards from the tableau."""
+        card = self._get_clicked_tableau_card(event)
+
+        if not card:
+            return False
+
+        logging.info('{} was clicked'.format(card))
+
+        self.selected_cards.append(card) # TODO
+
+        return True
+
+    def _event_place_tableau_cards(self, event):
+        """Place one or more cards on the tableau."""
+        pile = self._get_clicked_pile(event)
+
+        if not pile:
+            return False
+
+        for card in self.selected_cards:
+            self.tableau[pile].append(card)
+            self.selected_cards.remove(card)
+
+        return True
+
+    def _was_an_available_card_clicked(self, event):
         """Click on any of the available cards deck."""
         if event.type == pygame.MOUSEBUTTONUP:
             for card in self.available_cards_images:
                 if card.rect.collidepoint(event.pos):
-                    self._deal(settings.CARDS_PER_DEAL)
-                    self._handle_complete_stacks()
-
                     return True
 
         return False
 
     def _get_clicked_tableau_card(self, event):
-        """Click on any of the tableau cards."""
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            # Click on any of the tableau cards
+        """Get the card that was clicked on the tableau."""
+        if event.type == pygame.MOUSEBUTTONUP and not self.selected_cards:
             for pile in self.tableau:
                 for card in reversed(pile):
                     if card.rect.collidepoint(event.pos):
@@ -200,19 +220,15 @@ class Game:
 
         return False
 
-    def _event_drag_tableau_card(self, event):
-        """Start to drag a tableau card."""
-        card = self._get_clicked_tableau_card(event)
+    def _get_clicked_pile(self, event):
+        """Return the pile ID in which a card was clicked on."""
+        if event.type == pygame.MOUSEBUTTONUP and self.selected_cards:
+            for i, pile in enumerate(self.tableau):
+                for card in reversed(pile):
+                    if card.rect.collidepoint(event.pos):
+                        return i
 
-        if not card:
-            return False
-
-        self.card_being_drag_and_drop = card
-
-    def _event_drop_tableau_card(self, event):
-        """Drop a tableau card."""
-        if event.type == pygame.MOUSEBUTTONUP and self.card_being_drag_and_drop:
-            self.card_being_drag_and_drop = None # TODO
+        return False
 
     # --------------------------------------------------------------------------
     # Drawing handlers
