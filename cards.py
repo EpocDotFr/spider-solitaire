@@ -43,10 +43,12 @@ class Card(pygame.sprite.Sprite):
 
     @property
     def is_face_down(self):
+        """is_face_down getter."""
         return self._is_face_down
 
     @is_face_down.setter
     def is_face_down(self, value):
+        """is_face_down setter."""
         self._is_face_down = value
 
         if self._is_face_down:
@@ -57,9 +59,11 @@ class Card(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def is_direct_next(self, other):
+        """Determine if this card is less powerful than another card."""
         return self.power + 1 == other.power
 
     def is_direct_previous(self, other):
+        """Determine if this card is more powerful than another card."""
         return self.power - 1 == other.power
 
     def __repr__(self):
