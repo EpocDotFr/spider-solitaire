@@ -25,8 +25,9 @@ class Game:
         """Load all images."""
         logging.info('Loading images')
 
-        self.images = {}
-        self.images['background'] = helpers.load_image('background.png')
+        self.images = {
+            'background': helpers.load_image('background.png')
+        }
 
         # TODO Load the others images here one time and assign them to the cards later
 
