@@ -41,7 +41,7 @@ This task is performed by the `build_*` scripts to be run in the corresponding O
 
 ## Credits
 
-  - Icon by [Everaldo Coelho](https://www.iconfinder.com/icons/4219/card_game_poker_icon) (freeware)
+  - Icon by [Everaldo Coelho](https://www.iconfinder.com/icons/4219/card_game_poker_icon) (LGPL)
   - Playing cards by [Kenney](http://kenney.nl/assets/boardgame-pack) (CC0 1.0 Universal)
   - Background by [Subtle Patterns](https://www.toptal.com/designers/subtlepatterns/pool-table/) (CC BY-SA 3.0)
   - Sound effects by [Kenney](https://kenney.nl/assets/casino-audio) (CC0 1.0 Universal)
