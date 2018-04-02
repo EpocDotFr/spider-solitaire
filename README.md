@@ -2,11 +2,13 @@
 
 The [Spider Solitaire](https://en.wikipedia.org/wiki/Spider_(solitaire)) cards game, implemented in Python.
 
-> TODO Screenshot
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EpocDotFr/spider-solitaire/master/screenshot.png">
+</p>
 
 ## Features
 
-> TODO
+This project isn't finished and will never be.
 
 ## Prerequisites
 
